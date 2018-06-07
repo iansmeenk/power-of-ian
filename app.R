@@ -10,13 +10,8 @@ ui <- fluidPage(
      
      # Sidebar panel for inputs ----
      sidebarPanel(
-          # Input: Selector for variable to plot against mpg ----
-          # selectInput("variable", "Variable:", 
-          #             c("Cylinders" = "cyl",
-          #               "Transmission" = "am",
-          #               "Gears" = "gear")),
-          # 
           
+          # Input: Test Type
           radioButtons(
                "testType", 
                label = h3("Type of Hypothesis Test"),
@@ -24,6 +19,7 @@ ui <- fluidPage(
                selected = 'means'
           ),
           
+          # Input: One sided or two sided
           radioButtons(
                "sidedness", 
                label = h3("One- or Two-Sided Test"),
@@ -31,6 +27,7 @@ ui <- fluidPage(
                selected = 'two'
           ),
           
+          # Input: Alpha
           sliderInput(
                "significance", 
                label = h3("Significance Level"), 
@@ -39,6 +36,7 @@ ui <- fluidPage(
                value = c(0.05, 0.05)
           ),
           
+          # Input: Power
           sliderInput(
                "power", 
                label = h3("Power"), 
@@ -47,6 +45,7 @@ ui <- fluidPage(
                value = c(0.8, 0.8)
           ),
           
+          # Input: Effect Size
           conditionalPanel(
                condition = "input.testType == 'means'",
                sliderInput(
@@ -58,6 +57,7 @@ ui <- fluidPage(
                )
           ),
           
+          # Input: Proportions
           conditionalPanel(
                condition = "input.testType == 'proportions'",
                sliderInput(
@@ -74,13 +74,6 @@ ui <- fluidPage(
      # Main panel for displaying outputs ----
      mainPanel(
           
-          # # Output: Formatted text for caption ----
-          # h3(textOutput("numRanges")),
-          # 
-          # # Output: Plot of the requested variable against mpg ----
-          # plotOutput("mpgPlot"),
-          
-          
           conditionalPanel(
                condition = "output.numRanges == 1",
                plotOutput("goodGraph")
@@ -90,14 +83,11 @@ ui <- fluidPage(
                h2(textOutput("result"))
           ),
           
-          h3(textOutput("numRanges"))
+          h6(textOutput("numRanges"))
      )
 )
 
-
-# mpgData <- mtcars
-# mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
-
+# Functions to be called server side
 sampleSizeCalulatorMeans <- function(sig, pow, effect, k=1, sided='two'){
      if (sided == 'two') sidedness <- 2 else sidedness <- 1
      z_alpha <- qnorm(sig/sidedness, lower.tail = FALSE)
@@ -190,31 +180,10 @@ server <- function(input, output) {
      })
      
      output$goodGraph <- renderPlot({
-          ggplot(data = dfPlotting()) + geom_line(aes(x,y))
+          ggplot(data = dfPlotting()) + 
+               geom_line(aes(x,y)) +
+               labs(y = 'Sample Size', x = '')
      })
-     
-     # Compute the formula text ----
-     # This is in a reactive expression since it is shared by the
-     # output$caption and output$mpgPlot functions
-     # formulaText <- reactive({
-     #      paste("mpg ~", input$variable)
-     # })
-     # 
-     # # Return the formula text for printing as a caption ----
-     # output$caption <- renderText({
-     #      formulaText()
-     # })
-     # 
-     # # You can access the values of the second widget with input$slider2, e.g.
-     # output$range <- renderPrint({ input$power })
-     # 
-     # # Generate a plot of the requested variable against mpg ----
-     # # and only exclude outliers if requested
-     # output$mpgPlot <- renderPlot({
-     #      boxplot(as.formula(formulaText()),
-     #              data = mpgData,
-     #              col = "#75AADB", pch = 19)
-     # })
      
 }
 
